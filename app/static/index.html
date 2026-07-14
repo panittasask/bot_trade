@@ -21,7 +21,7 @@
       <header>
         <div><p class="eyebrow">AUTOMATED STRATEGY</p><h1>Trading overview</h1></div>
         <div class="header-actions">
-          <div class="mode-pill"><span></span> PAPER / SYNTHETIC</div>
+          <div id="modePill" class="mode-pill"><span></span> CONNECTING / PAPER</div>
           <button id="resetBtn" class="icon-btn" title="รีเซ็ตพอร์ต">↻</button>
           <button id="toggleBtn" class="primary">▶ Start bot</button>
         </div>
@@ -29,7 +29,7 @@
 
       <section class="ticker-row">
         <div class="symbol-select"><label>MARKET</label><select id="symbolSelect"></select></div>
-        <div class="price-block"><label>LAST PRICE</label><strong id="price">—</strong><span id="priceDelta">LIVE FEED</span></div>
+        <div class="price-block"><label>LAST PRICE</label><strong id="price">—</strong><span id="priceDelta">CONNECTING</span><small id="dataSource">—</small></div>
         <div class="signal"><label>BOT SIGNAL</label><strong id="signal">WAITING</strong></div>
         <div class="engine-state"><span id="stateDot"></span><div><label>ENGINE</label><strong id="engineState">STOPPED</strong></div></div>
       </section>
@@ -64,11 +64,10 @@
         <div class="panel-head"><div><p class="eyebrow">EXECUTIONS</p><h2>Recent trades</h2></div><span id="tradeBadge">0 ORDERS</span></div>
         <div class="table-wrap"><table><thead><tr><th>TIME</th><th>ASSET</th><th>SIDE</th><th>QUANTITY</th><th>PRICE</th><th>REASON</th><th>P/L</th></tr></thead><tbody id="tradesBody"></tbody></table><div id="emptyTrades" class="empty-row">No orders yet — the strategy is watching the market.</div></div>
       </section>
-      <footer>Educational paper-trading simulator. Not financial advice. Synthetic prices are not market data.</footer>
+      <footer>Real Kraken Spot data for crypto; synthetic stock prices. Paper orders only. Not financial advice.</footer>
     </main>
   </div>
   <div id="toast"></div>
   <script src="/static/app.js"></script>
 </body>
 </html>
-

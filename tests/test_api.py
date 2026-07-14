@@ -7,7 +7,8 @@ def test_status_and_config_validation():
     with TestClient(app) as client:
         status = client.get("/api/status")
         assert status.status_code == 200
-        assert status.json()["mode"] == "PAPER / SYNTHETIC"
+        assert status.json()["mode"] == "REAL DATA / PAPER"
+        assert status.json()["market_data"]["source"] == "Kraken Spot"
 
         invalid = client.put(
             "/api/config",
@@ -27,4 +28,3 @@ def test_rejects_unknown_symbol():
     with TestClient(app) as client:
         response = client.put("/api/symbol", json={"symbol": "NOT-A-MARKET"})
         assert response.status_code == 400
-

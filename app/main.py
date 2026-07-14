@@ -40,8 +40,10 @@ engine = TradingEngine(db)
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await engine.crypto_feed.start()
     yield
     await engine.stop()
+    await engine.crypto_feed.stop()
 
 
 app = FastAPI(title="TradeLab Paper Bot", version="1.0.0", lifespan=lifespan)

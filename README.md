@@ -1,6 +1,6 @@
 # TradeLab Paper Bot
 
-บอทเทรดเพื่อการเรียนรู้และทดสอบกลยุทธ์ พร้อม dashboard แบบเรียลไทม์ รองรับตลาดจำลอง `BTC/USD`, `ETH/USD`, `AAPL` และ `SPY` โดย **ไม่ส่งคำสั่งซื้อขายด้วยเงินจริง**
+บอทเทรดเพื่อการเรียนรู้และทดสอบกลยุทธ์ พร้อม dashboard แบบเรียลไทม์ โดย `BTC/USD` และ `ETH/USD` ใช้ราคา Kraken Spot จริง ส่วน `AAPL` และ `SPY` ยังใช้ราคาจำลอง ทุกคำสั่งเป็น Paper และ **ไม่ส่งคำสั่งซื้อขายด้วยเงินจริง**
 
 ## ฟีเจอร์
 
@@ -9,6 +9,7 @@
 - Paper portfolio พร้อม cash, equity, unrealized/realized P&L
 - บันทึกคำสั่งและ equity curve ลง SQLite
 - Dashboard responsive อัปเดตผ่าน WebSocket
+- Public Kraken WebSocket v2 พร้อม reconnect และ stale-data guard (ไม่ต้องใช้ API key)
 - API สำหรับ start, stop, reset, เปลี่ยนตลาด และปรับกลยุทธ์
 
 ## เริ่มใช้งาน
@@ -48,11 +49,11 @@ docker run --rm -p 8000:8000 -v ${PWD}/data:/app/data tradelab
 | `POST` | `/api/stop` | หยุด engine |
 | `POST` | `/api/reset` | ล้าง paper portfolio และประวัติ |
 | `PUT` | `/api/config` | ปรับ SMA และ risk parameters |
-| `PUT` | `/api/symbol` | เปลี่ยนตลาดจำลอง |
+| `PUT` | `/api/symbol` | เปลี่ยนตลาดที่ติดตาม |
 | `WS` | `/ws` | สตรีม snapshot ไปยัง dashboard |
 
 ## ก่อนเชื่อมเงินจริง
 
-รุ่นนี้จงใจใช้ synthetic feed และ paper broker เพื่อความปลอดภัย หากจะต่อโบรกเกอร์ แนะนำเริ่มจากบัญชี paper ของ Alpaca ซึ่งแยก endpoint และ credentials ออกจากบัญชี live จากนั้นจึงเพิ่ม broker adapter โดยคง risk controls และ kill switch ไว้ ห้ามใส่ API secret ใน source code หรือ commit ลง Git
+รุ่นนี้ใช้ข้อมูล Kraken Spot จริงเฉพาะคริปโต แต่ยังใช้ paper broker เพื่อความปลอดภัย หากจะต่อโบรกเกอร์ แนะนำเริ่มจากบัญชี paper ของ Alpaca ซึ่งแยก endpoint และ credentials ออกจากบัญชี live จากนั้นจึงเพิ่ม broker adapter โดยคง risk controls และ kill switch ไว้ ห้ามใส่ API secret ใน source code หรือ commit ลง Git
 
 > ซอฟต์แวร์นี้เป็นเครื่องมือเพื่อการศึกษา ไม่ใช่คำแนะนำทางการเงิน ผลจากข้อมูลจำลองหรือ backtest ไม่รับประกันผลในตลาดจริง

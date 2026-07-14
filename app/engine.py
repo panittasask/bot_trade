@@ -9,6 +9,7 @@ from dataclasses import asdict
 from typing import Callable
 
 from .database import Database
+from .market_data import CRYPTO_SYMBOLS, KrakenCryptoFeed
 from .models import Position, Trade, utc_now
 
 
@@ -34,7 +35,12 @@ class SyntheticMarket:
 
 
 class TradingEngine:
-    def __init__(self, db: Database, tick_seconds: float | None = None) -> None:
+    def __init__(
+        self,
+        db: Database,
+        tick_seconds: float | None = None,
+        crypto_feed: KrakenCryptoFeed | None = None,
+    ) -> None:
         self.db = db
         self.tick_seconds = tick_seconds or float(os.getenv("TICK_SECONDS", "2"))
         self.starting_cash = float(os.getenv("STARTING_CASH", "100000"))
@@ -43,6 +49,10 @@ class TradingEngine:
         self.positions = {k: Position(**v) for k, v in raw_positions.items()}
         self.symbol = str(db.get_state("symbol", "BTC/USD"))
         self.prices = SyntheticMarket()
+        self.crypto_feed = crypto_feed or KrakenCryptoFeed(
+            stale_after=float(os.getenv("MARKET_DATA_STALE_SECONDS", "30")),
+            on_update=self.broadcast,
+        )
         self.history: dict[str, deque[float]] = defaultdict(lambda: deque(maxlen=100))
         self.running = False
         self.task: asyncio.Task | None = None
@@ -58,11 +68,29 @@ class TradingEngine:
         }
 
     @property
-    def current_price(self) -> float:
-        return self.prices.prices[self.symbol]
+    def current_price(self) -> float | None:
+        if self.symbol in CRYPTO_SYMBOLS:
+            return self.crypto_feed.prices.get(self.symbol)
+        return self._price_for_symbol(self.symbol)
+
+    def _price_for_symbol(self, symbol: str) -> float:
+        if symbol in CRYPTO_SYMBOLS and symbol in self.crypto_feed.prices:
+            return self.crypto_feed.prices[symbol]
+        return self.prices.prices[symbol]
+
+    def market_data_status(self) -> dict:
+        if self.symbol in CRYPTO_SYMBOLS:
+            return self.crypto_feed.status_for(self.symbol)
+        return {
+            "status": "SYNTHETIC",
+            "source": "Local simulator",
+            "is_live": False,
+            "last_update": None,
+            "error": None,
+        }
 
     def portfolio_value(self) -> float:
-        return self.cash + sum(p.quantity * self.prices.prices.get(s, p.average_price) for s, p in self.positions.items())
+        return self.cash + sum(p.quantity * self._price_for_symbol(s) for s, p in self.positions.items())
 
     def snapshot(self) -> dict:
         price = self.current_price
@@ -71,7 +99,8 @@ class TradingEngine:
         long = self.config["long_window"]
         return {
             "running": self.running,
-            "mode": "PAPER / SYNTHETIC",
+            "mode": "REAL DATA / PAPER" if self.symbol in CRYPTO_SYMBOLS else "SYNTHETIC / PAPER",
+            "market_data": self.market_data_status(),
             "symbol": self.symbol,
             "symbols": list(DEFAULT_SYMBOLS),
             "price": price,
@@ -82,7 +111,7 @@ class TradingEngine:
             "signal": self.last_signal,
             "sma_short": round(sum(hist[-short:]) / short, 4) if len(hist) >= short else None,
             "sma_long": round(sum(hist[-long:]) / long, 4) if len(hist) >= long else None,
-            "positions": [p.to_dict(self.prices.prices.get(s, p.average_price)) for s, p in self.positions.items()],
+            "positions": [p.to_dict(self._price_for_symbol(s)) for s, p in self.positions.items()],
             "trades": self.db.recent_trades(30),
             "equity_history": self.db.equity_history(),
             "price_history": hist,
@@ -112,7 +141,13 @@ class TradingEngine:
             await asyncio.sleep(self.tick_seconds)
 
     def step(self) -> None:
-        price = self.prices.tick(self.symbol)
+        if self.symbol in CRYPTO_SYMBOLS:
+            if not self.crypto_feed.is_fresh(self.symbol):
+                self.last_signal = "DATA WAIT"
+                return
+            price = self.crypto_feed.prices[self.symbol]
+        else:
+            price = self.prices.tick(self.symbol)
         hist = self.history[self.symbol]
         hist.append(price)
         self._evaluate(price, list(hist))

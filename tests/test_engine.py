@@ -56,3 +56,10 @@ def test_reset_clears_portfolio_and_history(engine: TradingEngine):
     assert not engine.positions
     assert engine.db.recent_trades() == []
     assert engine.db.equity_history() == []
+
+
+def test_crypto_does_not_trade_when_feed_is_unavailable(engine: TradingEngine):
+    engine.crypto_feed.connected = False
+    engine.step()
+    assert engine.last_signal == "DATA WAIT"
+    assert engine.db.equity_history() == []
