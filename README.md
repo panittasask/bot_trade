@@ -15,6 +15,8 @@
 ## เริ่มใช้งาน
 
 > คู่มือการใช้งาน Dashboard แบบละเอียด: [USER_GUIDE_TH.md](USER_GUIDE_TH.md)
+>
+> แผนพัฒนาขั้นต่อไปและเกณฑ์ส่งมอบ: [ROADMAP_TH.md](ROADMAP_TH.md)
 
 ต้องมี Python 3.10 ขึ้นไป จาก PowerShell:
 
