@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TradeLab — Paper Bot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand"><span class="brand-mark">T</span><div>TRADELAB<small>PAPER TERMINAL</small></div></div>
+      <nav><button class="nav-active">▦ <span>Overview</span></button><button>⌁ <span>Strategy</span></button><button>⇄ <span>Activity</span></button></nav>
+      <div class="aside-bottom"><span class="live-dot"></span><div><b>Local engine</b><small>No real funds</small></div></div>
+    </aside>
+
+    <main>
+      <header>
+        <div><p class="eyebrow">AUTOMATED STRATEGY</p><h1>Trading overview</h1></div>
+        <div class="header-actions">
+          <div class="mode-pill"><span></span> PAPER / SYNTHETIC</div>
+          <button id="resetBtn" class="icon-btn" title="รีเซ็ตพอร์ต">↻</button>
+          <button id="toggleBtn" class="primary">▶ Start bot</button>
+        </div>
+      </header>
+
+      <section class="ticker-row">
+        <div class="symbol-select"><label>MARKET</label><select id="symbolSelect"></select></div>
+        <div class="price-block"><label>LAST PRICE</label><strong id="price">—</strong><span id="priceDelta">LIVE FEED</span></div>
+        <div class="signal"><label>BOT SIGNAL</label><strong id="signal">WAITING</strong></div>
+        <div class="engine-state"><span id="stateDot"></span><div><label>ENGINE</label><strong id="engineState">STOPPED</strong></div></div>
+      </section>
+
+      <section class="metrics">
+        <article><label>Portfolio value</label><strong id="equity">—</strong><small id="pnl">—</small></article>
+        <article><label>Available cash</label><strong id="cash">—</strong><small>Ready to deploy</small></article>
+        <article><label>Open positions</label><strong id="positionCount">0</strong><small id="exposure">0% exposure</small></article>
+        <article><label>Completed trades</label><strong id="tradeCount">0</strong><small>Current session</small></article>
+      </section>
+
+      <section class="grid-main">
+        <article class="panel chart-panel">
+          <div class="panel-head"><div><p class="eyebrow">PERFORMANCE</p><h2>Equity curve</h2></div><span class="range">LIVE</span></div>
+          <canvas id="equityChart"></canvas>
+          <div id="chartEmpty" class="chart-empty">Start the bot to collect performance data</div>
+        </article>
+
+        <article class="panel config-panel">
+          <div class="panel-head"><div><p class="eyebrow">CONTROLS</p><h2>Risk & strategy</h2></div></div>
+          <form id="configForm">
+            <div class="field-pair"><label>Fast SMA<input name="short_window" type="number" min="2"></label><label>Slow SMA<input name="long_window" type="number" min="3"></label></div>
+            <label>Order size <span><output id="tradeOut"></output>%</span><input name="trade_size_pct" type="range" min="1" max="50" step="1"></label>
+            <label>Max exposure <span><output id="maxOut"></output>%</span><input name="max_position_pct" type="range" min="5" max="100" step="5"></label>
+            <div class="field-pair"><label>Stop loss %<input name="stop_loss_pct" type="number" min="0.1" step="0.1"></label><label>Take profit %<input name="take_profit_pct" type="number" min="0.1" step="0.1"></label></div>
+            <button type="submit" class="save-btn">Save parameters</button>
+          </form>
+        </article>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="panel-head"><div><p class="eyebrow">EXECUTIONS</p><h2>Recent trades</h2></div><span id="tradeBadge">0 ORDERS</span></div>
+        <div class="table-wrap"><table><thead><tr><th>TIME</th><th>ASSET</th><th>SIDE</th><th>QUANTITY</th><th>PRICE</th><th>REASON</th><th>P/L</th></tr></thead><tbody id="tradesBody"></tbody></table><div id="emptyTrades" class="empty-row">No orders yet — the strategy is watching the market.</div></div>
+      </section>
+      <footer>Educational paper-trading simulator. Not financial advice. Synthetic prices are not market data.</footer>
+    </main>
+  </div>
+  <div id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
